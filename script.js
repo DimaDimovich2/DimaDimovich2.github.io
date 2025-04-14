@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             size: 70,
             type: 'text/plain',
             date: '2023-12-10T10:05:00.000Z',
-            path: './files/инструкция.txt',
+            path: '/files/инструкция.txt',
             category: 'documents'
         },
         {
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             size: 12582912, // примерно 12MB
             type: 'application/octet-stream',
             date: '2023-12-10T11:30:00.000Z',
-            path: './files/dimf.blend',
+            path: '/files/dimf.blend',
             category: 'other'
         },
         {
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             size: 634,
             type: 'text/markdown',
             date: '2023-12-10T12:00:00.000Z',
-            path: './files/readme.md',
+            path: '/files/readme.md',
             category: 'documents'
         }
     ];
@@ -648,7 +648,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function copyFileLink() {
         if (!activeFile) return;
         
-        const url = window.location.origin + '/' + activeFile.path;
+        // Формируем полный URL на основе базового пути и репозитория
+        // Для GitHub Pages с пользовательским доменом
+        const url = window.location.origin + activeFile.path;
         
         navigator.clipboard.writeText(url)
             .then(() => {
