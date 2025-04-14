@@ -11,8 +11,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Активный файл для модального окна
     let activeFile = null;
     
+    // Реальные файлы в директории files
+    const realFiles = [
+        {
+            name: 'инструкция.txt',
+            size: 70,
+            type: 'text/plain',
+            date: '2023-12-10T10:05:00.000Z',
+            path: 'files/инструкция.txt'
+        },
+        {
+            name: 'dimf.blend',
+            size: 12582912, // примерно 12MB
+            type: 'application/octet-stream',
+            date: '2023-12-10T11:30:00.000Z',
+            path: 'files/dimf.blend'
+        },
+        {
+            name: 'readme.md',
+            size: 634,
+            type: 'text/markdown',
+            date: '2023-12-10T12:00:00.000Z',
+            path: 'files/readme.md'
+        }
+    ];
+    
     // Загружаем список файлов при инициализации
-    loadFileList();
+    displayFiles(realFiles);
 
     // Обработка поиска
     searchInput.addEventListener('input', filterFiles);
@@ -30,74 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Кнопка скачивания в модальном окне
     downloadBtn.addEventListener('click', downloadFile);
-
-    // Загрузка списка файлов из директории
-    function loadFileList() {
-        // В реальном приложении здесь был бы AJAX запрос к серверу
-        // для получения списка файлов из директории
-        
-        // Для примера создадим некоторые демонстрационные файлы
-        const demoFiles = [
-            {
-                name: 'презентация.pptx',
-                size: 2540000,
-                type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                date: '2023-10-15T10:30:00.000Z',
-                path: 'files/презентация.pptx'
-            },
-            {
-                name: 'документация.pdf',
-                size: 1250000,
-                type: 'application/pdf',
-                date: '2023-10-10T14:15:00.000Z',
-                path: 'files/документация.pdf'
-            },
-            {
-                name: 'отчет.docx',
-                size: 550000,
-                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                date: '2023-10-05T09:45:00.000Z',
-                path: 'files/отчет.docx'
-            },
-            {
-                name: 'данные.xlsx',
-                size: 820000,
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                date: '2023-10-01T16:20:00.000Z',
-                path: 'files/данные.xlsx'
-            },
-            {
-                name: 'фото.jpg',
-                size: 1800000,
-                type: 'image/jpeg',
-                date: '2023-09-28T11:10:00.000Z',
-                path: 'files/фото.jpg'
-            },
-            {
-                name: 'архив.zip',
-                size: 3500000,
-                type: 'application/zip',
-                date: '2023-09-25T13:40:00.000Z',
-                path: 'files/архив.zip'
-            },
-            {
-                name: 'инструкция.txt',
-                size: 15000,
-                type: 'text/plain',
-                date: '2023-09-20T10:05:00.000Z',
-                path: 'files/инструкция.txt'
-            },
-            {
-                name: 'видео.mp4',
-                size: 25000000,
-                type: 'video/mp4',
-                date: '2023-09-15T15:30:00.000Z',
-                path: 'files/видео.mp4'
-            }
-        ];
-        
-        displayFiles(demoFiles);
-    }
 
     // Отображение файлов в списке
     function displayFiles(files) {
@@ -120,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileItem.className = 'file-item';
         fileItem.style.position = 'relative';
         
-        const fileIcon = getFileIcon(file.type);
+        const fileIcon = getFileIcon(file.type, file.name);
         const fileDate = new Date(file.date).toLocaleDateString();
         const fileSize = formatFileSize(file.size);
         
@@ -146,8 +103,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return fileItem;
     }
 
-    // Получение иконки в зависимости от типа файла
-    function getFileIcon(fileType) {
+    // Получение иконки в зависимости от типа файла и имени
+    function getFileIcon(fileType, fileName) {
+        // Проверка по расширению файла
+        if (fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            
+            if (extension === 'pdf') return 'fas fa-file-pdf';
+            if (extension === 'doc' || extension === 'docx') return 'fas fa-file-word';
+            if (extension === 'xls' || extension === 'xlsx') return 'fas fa-file-excel';
+            if (extension === 'ppt' || extension === 'pptx') return 'fas fa-file-powerpoint';
+            if (extension === 'zip' || extension === 'rar' || extension === '7z') return 'fas fa-file-archive';
+            if (extension === 'txt') return 'fas fa-file-alt';
+            if (extension === 'html' || extension === 'css' || extension === 'js') return 'fas fa-file-code';
+            if (extension === 'md') return 'fas fa-file-alt';
+            if (extension === 'blend') return 'fas fa-cubes';
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension)) return 'fas fa-image';
+            if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(extension)) return 'fas fa-file-video';
+            if (['mp3', 'wav', 'ogg', 'flac'].includes(extension)) return 'fas fa-file-audio';
+        }
+        
+        // Запасной вариант - проверка по MIME-типу
         if (fileType.includes('image')) return 'fas fa-image';
         if (fileType.includes('pdf')) return 'fas fa-file-pdf';
         if (fileType.includes('word') || fileType.includes('document')) return 'fas fa-file-word';
@@ -158,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileType.includes('zip') || fileType.includes('archive') || fileType.includes('compressed')) return 'fas fa-file-archive';
         if (fileType.includes('text')) return 'fas fa-file-alt';
         if (fileType.includes('html')) return 'fas fa-file-code';
+        
         return 'fas fa-file';
     }
 
@@ -180,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
                 <div style="margin-bottom: 0.8rem; display: flex; align-items: center; justify-content: center;">
                     <div style="width: 60px; height: 60px; background: rgba(138, 110, 255, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                        <i class="${getFileIcon(file.type)}" style="font-size: 1.8rem; color: var(--primary-color);"></i>
+                        <i class="${getFileIcon(file.type, file.name)}" style="font-size: 1.8rem; color: var(--primary-color);"></i>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
@@ -211,68 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function filterFiles() {
         const searchTerm = searchInput.value.toLowerCase();
         
-        // В реальном приложении здесь был бы запрос к серверу
-        // Для примера снова создадим демонстрационные файлы и отфильтруем их
-        const demoFiles = [
-            {
-                name: 'презентация.pptx',
-                size: 2540000,
-                type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                date: '2023-10-15T10:30:00.000Z',
-                path: 'files/презентация.pptx'
-            },
-            {
-                name: 'документация.pdf',
-                size: 1250000,
-                type: 'application/pdf',
-                date: '2023-10-10T14:15:00.000Z',
-                path: 'files/документация.pdf'
-            },
-            {
-                name: 'отчет.docx',
-                size: 550000,
-                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                date: '2023-10-05T09:45:00.000Z',
-                path: 'files/отчет.docx'
-            },
-            {
-                name: 'данные.xlsx',
-                size: 820000,
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                date: '2023-10-01T16:20:00.000Z',
-                path: 'files/данные.xlsx'
-            },
-            {
-                name: 'фото.jpg',
-                size: 1800000,
-                type: 'image/jpeg',
-                date: '2023-09-28T11:10:00.000Z',
-                path: 'files/фото.jpg'
-            },
-            {
-                name: 'архив.zip',
-                size: 3500000,
-                type: 'application/zip',
-                date: '2023-09-25T13:40:00.000Z',
-                path: 'files/архив.zip'
-            },
-            {
-                name: 'инструкция.txt',
-                size: 15000,
-                type: 'text/plain',
-                date: '2023-09-20T10:05:00.000Z',
-                path: 'files/инструкция.txt'
-            },
-            {
-                name: 'видео.mp4',
-                size: 25000000,
-                type: 'video/mp4',
-                date: '2023-09-15T15:30:00.000Z',
-                path: 'files/видео.mp4'
-            }
-        ];
-        
-        const filteredFiles = demoFiles.filter(file => 
+        const filteredFiles = realFiles.filter(file => 
             file.name.toLowerCase().includes(searchTerm)
         );
         
