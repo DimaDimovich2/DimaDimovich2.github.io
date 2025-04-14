@@ -18,26 +18,38 @@ document.addEventListener('DOMContentLoaded', () => {
             size: 70,
             type: 'text/plain',
             date: '2023-12-10T10:05:00.000Z',
-            path: 'files/инструкция.txt'
+            path: './files/инструкция.txt'
         },
         {
             name: 'dimf.blend',
             size: 12582912, // примерно 12MB
             type: 'application/octet-stream',
             date: '2023-12-10T11:30:00.000Z',
-            path: 'files/dimf.blend'
+            path: './files/dimf.blend'
         },
         {
             name: 'readme.md',
             size: 634,
             type: 'text/markdown',
             date: '2023-12-10T12:00:00.000Z',
-            path: 'files/readme.md'
+            path: './files/readme.md'
         }
     ];
     
+    // Обработка ошибок
+    window.onerror = function(message, source, lineno, colno, error) {
+        console.error('Ошибка:', message);
+        fileList.innerHTML = `<p class="file-error">Произошла ошибка при загрузке файлов</p>`;
+        return false;
+    };
+    
     // Загружаем список файлов при инициализации
-    displayFiles(realFiles);
+    try {
+        displayFiles(realFiles);
+    } catch (e) {
+        console.error('Ошибка при отображении файлов:', e);
+        fileList.innerHTML = `<p class="file-error">Ошибка при отображении файлов</p>`;
+    }
 
     // Обработка поиска
     searchInput.addEventListener('input', filterFiles);
@@ -75,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function createFileElement(file) {
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
-        fileItem.style.position = 'relative';
         
         const fileIcon = getFileIcon(file.type, file.name);
         const fileDate = new Date(file.date).toLocaleDateString();
@@ -96,11 +107,29 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         
+        // Обработчик клика по файлу
         fileItem.addEventListener('click', () => {
             openFileModal(file);
         });
         
+        // Обработчик клика по иконке скачивания
+        const downloadIcon = fileItem.querySelector('.download-icon');
+        downloadIcon.addEventListener('click', (e) => {
+            e.stopPropagation(); // Предотвращаем открытие модального окна
+            downloadDirectly(file);
+        });
+        
         return fileItem;
+    }
+    
+    // Функция для прямого скачивания
+    function downloadDirectly(file) {
+        const link = document.createElement('a');
+        link.href = file.path;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // Получение иконки в зависимости от типа файла и имени
@@ -154,34 +183,138 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Информация о файле
         modalContent.innerHTML = `
-            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <div style="margin-bottom: 0.8rem; display: flex; align-items: center; justify-content: center;">
-                    <div style="width: 60px; height: 60px; background: rgba(138, 110, 255, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                        <i class="${getFileIcon(file.type, file.name)}" style="font-size: 1.8rem; color: var(--primary-color);"></i>
+            <div class="file-details">
+                <div class="file-preview">
+                    <div class="preview-icon">
+                        <i class="${getFileIcon(file.type, file.name)}"></i>
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
-                    <div style="color: var(--text-muted);">Тип файла:</div>
-                    <div>${file.type || 'Неизвестный'}</div>
-                    <div style="color: var(--text-muted);">Размер:</div>
-                    <div>${formatFileSize(file.size)}</div>
-                    <div style="color: var(--text-muted);">Дата добавления:</div>
-                    <div>${new Date(file.date).toLocaleString()}</div>
+                <div class="file-info">
+                    <div class="info-row">
+                        <span class="info-label">Тип:</span>
+                        <span class="info-value">${getFileType(file.type, file.name)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Размер:</span>
+                        <span class="info-value">${formatFileSize(file.size)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Дата:</span>
+                        <span class="info-value">${new Date(file.date).toLocaleString()}</span>
+                    </div>
                 </div>
             </div>
         `;
         
+        // Стили для блоков информации
+        const style = document.createElement('style');
+        style.textContent = `
+            .file-details {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+                padding: 1rem;
+                background: ${file.type.includes('image') ? 'transparent' : '#f8fafc'};
+                border-radius: 8px;
+            }
+            .file-preview {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .preview-icon {
+                width: 70px;
+                height: 70px;
+                background: #f0f4ff;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .preview-icon i {
+                font-size: 2rem;
+                color: var(--primary-color);
+            }
+            .file-info {
+                width: 100%;
+            }
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.7rem 0;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .info-label {
+                font-weight: 500;
+                color: var(--text-light);
+            }
+            .info-value {
+                font-weight: 500;
+                color: var(--text-color);
+            }
+        `;
+        modalContent.appendChild(style);
+        
         // Предпросмотр для изображений
         if (file.type.includes('image')) {
-            modalContent.innerHTML += `
-                <div style="text-align: center; margin-top: 1rem;">
-                    <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Предпросмотр:</p>
-                    <img src="${file.path}" alt="${file.name}" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain; background: rgba(0,0,0,0.2);">
-                </div>
+            const imgPreview = document.createElement('div');
+            imgPreview.style.marginTop = '1rem';
+            imgPreview.style.textAlign = 'center';
+            imgPreview.innerHTML = `
+                <img src="${file.path}" alt="${file.name}" 
+                    style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain;">
             `;
+            modalContent.querySelector('.file-preview').innerHTML = '';
+            modalContent.querySelector('.file-preview').appendChild(imgPreview);
         }
         
         fileModal.style.display = 'flex';
+    }
+    
+    // Получение читаемого типа файла
+    function getFileType(fileType, fileName) {
+        if (fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            
+            const typeMap = {
+                'pdf': 'PDF документ',
+                'doc': 'Word документ',
+                'docx': 'Word документ',
+                'xls': 'Excel таблица',
+                'xlsx': 'Excel таблица',
+                'ppt': 'PowerPoint презентация',
+                'pptx': 'PowerPoint презентация',
+                'txt': 'Текстовый файл',
+                'md': 'Markdown файл',
+                'png': 'Изображение PNG',
+                'jpg': 'Изображение JPEG',
+                'jpeg': 'Изображение JPEG',
+                'gif': 'Изображение GIF',
+                'mp4': 'Видео MP4',
+                'mp3': 'Аудио MP3',
+                'zip': 'Архив ZIP',
+                'rar': 'Архив RAR',
+                'blend': 'Blender файл'
+            };
+            
+            if (extension in typeMap) {
+                return typeMap[extension];
+            }
+        }
+        
+        // Общие типы файлов
+        if (fileType.includes('image')) return 'Изображение';
+        if (fileType.includes('pdf')) return 'PDF документ';
+        if (fileType.includes('word') || fileType.includes('document')) return 'Документ';
+        if (fileType.includes('excel') || fileType.includes('sheet')) return 'Таблица';
+        if (fileType.includes('powerpoint') || fileType.includes('presentation')) return 'Презентация';
+        if (fileType.includes('video')) return 'Видео';
+        if (fileType.includes('audio')) return 'Аудио';
+        if (fileType.includes('zip') || fileType.includes('archive')) return 'Архив';
+        if (fileType.includes('text')) return 'Текстовый файл';
+        
+        return 'Файл';
     }
 
     // Фильтрация файлов по поиску
@@ -195,16 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
         displayFiles(filteredFiles);
     }
 
-    // Скачивание файла
+    // Скачивание файла из модального окна
     function downloadFile() {
         if (!activeFile) return;
         
-        // Создаем ссылку для скачивания
-        const link = document.createElement('a');
-        link.href = activeFile.path;
-        link.download = activeFile.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        downloadDirectly(activeFile);
+        fileModal.style.display = 'none';
     }
 }); 
