@@ -7,12 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContent = document.getElementById('modalContent');
     const downloadBtn = document.getElementById('downloadBtn');
     const closeModalBtn = document.querySelector('.close');
-    const fileCount = document.getElementById('fileCount');
-    const totalSize = document.getElementById('totalSize');
     const categoryCount = document.getElementById('categoryCount');
     const currentCategory = document.getElementById('currentCategory');
-    const recentFiles = document.getElementById('recentFiles');
-    const clearRecentBtn = document.getElementById('clearRecentBtn');
     
     // Элементы управления категориями и видом
     const categoryBtns = document.querySelectorAll('.category-btn');
@@ -50,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let filteredFiles = [];
     let currentView = 'grid'; // grid или list
     let currentCategoryFilter = 'all';
-    let recentlyViewed = [];
     let favorites = [];
     let settings = {
         theme: 'light',
@@ -100,16 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         // Применяем тему и другие настройки
         applySettings();
-        // Загрузка недавно просмотренных файлов
-        loadRecentFiles();
         // Загрузка избранных файлов
         loadFavorites();
         // Загрузка и отображение файлов
         loadFiles();
         // Установка обработчиков событий
         setupEventListeners();
-        // Инициализация данных о хранилище
-        initializeStorageData();
     }
     
     // Загрузка настроек из localStorage
@@ -170,29 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadFiles() {
         try {
             currentFiles = [...realFiles];
-            updateFileStats();
             applyFilters();
         } catch (e) {
             console.error('Ошибка при загрузке файлов:', e);
             fileList.innerHTML = `<p class="file-error">Ошибка при загрузке файлов</p>`;
         }
-    }
-    
-    // Обновление статистики файлов
-    function updateFileStats() {
-        // Обновляем общую статистику
-        fileCount.textContent = `${currentFiles.length} ${getFileCountText(currentFiles.length)}`;
-        
-        // Вычисляем общий размер
-        let total = currentFiles.reduce((sum, file) => sum + file.size, 0);
-        totalSize.textContent = formatFileSize(total);
-        
-        // Обновляем количество в текущей категории
-        const categoryFiles = currentCategoryFilter === 'all' 
-            ? currentFiles 
-            : currentFiles.filter(file => file.category === currentCategoryFilter);
-            
-        categoryCount.textContent = `${categoryFiles.length} ${getFileCountText(categoryFiles.length)}`;
     }
     
     // Получение правильного склонения для числа файлов
@@ -236,6 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Отображение файлов
         displayFiles();
+        
+        // Обновляем счетчик категории
+        const categoryFiles = currentCategoryFilter === 'all' 
+            ? currentFiles 
+            : currentFiles.filter(file => file.category === currentCategoryFilter);
+            
+        categoryCount.textContent = `${categoryFiles.length} ${getFileCountText(categoryFiles.length)}`;
     }
     
     // Сортировка файлов
@@ -339,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Обработчик клика по файлу
         fileItem.addEventListener('click', () => {
-            addToRecentFiles(file);
             openFileModal(file);
         });
         
@@ -381,76 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Проверка, является ли файл избранным
     function isFavorite(fileId) {
         return favorites.includes(fileId);
-    }
-    
-    // Добавление файла в недавно просмотренные
-    function addToRecentFiles(file) {
-        // Удаляем файл из списка, если он уже там есть
-        recentlyViewed = recentlyViewed.filter(id => id !== file.id);
-        
-        // Добавляем в начало
-        recentlyViewed.unshift(file.id);
-        
-        // Ограничиваем список 5 элементами
-        if (recentlyViewed.length > 5) {
-            recentlyViewed = recentlyViewed.slice(0, 5);
-        }
-        
-        // Сохраняем в localStorage
-        localStorage.setItem('recentlyViewedFiles', JSON.stringify(recentlyViewed));
-        
-        // Обновляем отображение
-        updateRecentFiles();
-    }
-    
-    // Загрузка недавно просмотренных файлов
-    function loadRecentFiles() {
-        const savedRecent = localStorage.getItem('recentlyViewedFiles');
-        if (savedRecent) {
-            recentlyViewed = JSON.parse(savedRecent);
-        }
-        updateRecentFiles();
-    }
-    
-    // Обновление отображения недавно просмотренных файлов
-    function updateRecentFiles() {
-        recentFiles.innerHTML = '';
-        
-        if (recentlyViewed.length === 0) {
-            recentFiles.innerHTML = '<p class="no-recent">Нет недавно просмотренных файлов</p>';
-            return;
-        }
-        
-        recentlyViewed.forEach(id => {
-            const file = currentFiles.find(f => f.id === id);
-            if (!file) return;
-            
-            const fileItem = document.createElement('div');
-            fileItem.className = 'recent-file';
-            
-            const fileName = settings.showExtensions ? file.name : removeExtension(file.name);
-            
-            fileItem.innerHTML = `
-                <div class="recent-icon">
-                    <i class="${getFileIcon(file.type, file.name)}"></i>
-                </div>
-                <div class="recent-name" title="${file.name}">${fileName}</div>
-            `;
-            
-            fileItem.addEventListener('click', () => {
-                openFileModal(file);
-            });
-            
-            recentFiles.appendChild(fileItem);
-        });
-    }
-    
-    // Очистка недавно просмотренных файлов
-    function clearRecentFiles() {
-        recentlyViewed = [];
-        localStorage.removeItem('recentlyViewedFiles');
-        updateRecentFiles();
-        showToast('Готово', 'История просмотров очищена');
     }
     
     // Загрузка избранных файлов
@@ -792,9 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
-        // Кнопка недавно просмотренных
-        clearRecentBtn.addEventListener('click', clearRecentFiles);
-        
         // Настройки
         settingsBtn.addEventListener('click', () => {
             settingsModal.style.display = 'flex';
@@ -817,7 +723,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Перерисовываем файлы с новыми настройками
             displayFiles();
-            updateRecentFiles();
             
             // Закрываем модальное окно
             settingsModal.style.display = 'none';
@@ -879,249 +784,4 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Подсказка', 'Нажмите на файл, чтобы посмотреть подробную информацию и скачать его');
         });
     }
-
-    // Функция для инициализации данных хранилища
-    function initializeStorageData() {
-        // Имитация данных о хранилище (в реальном приложении данные будут получены с сервера)
-        const storageData = {
-            total: 100, // Гб
-            used: 68,   // Гб
-            types: {
-                documents: 15, // Гб
-                images: 28,    // Гб
-                archives: 12,  // Гб
-                other: 13      // Гб
-            }
-        };
-
-        // Обновление статистики
-        updateStorageStats(storageData);
-        
-        // Обновление диаграммы
-        updateStorageChart(storageData);
-    }
-
-    // Функция для обновления статистики хранилища
-    function updateStorageStats(data) {
-        // Обновляем общую статистику
-        fileCount.textContent = `${currentFiles.length} ${getFileCountText(currentFiles.length)}`;
-        
-        // Вычисляем общий размер
-        let total = currentFiles.reduce((sum, file) => sum + file.size, 0);
-        totalSize.textContent = formatFileSize(total);
-        
-        // Обновляем количество в текущей категории
-        const categoryFiles = currentCategoryFilter === 'all' 
-            ? currentFiles 
-            : currentFiles.filter(file => file.category === currentCategoryFilter);
-            
-        categoryCount.textContent = `${categoryFiles.length} ${getFileCountText(categoryFiles.length)}`;
-    }
-
-    // Функция для обновления диаграммы хранилища
-    function updateStorageChart(data) {
-        const storageProgressElement = document.querySelector('.storage-progress');
-        const usedPercentage = (data.used / data.total) * 100;
-        
-        // Анимация заполнения диаграммы
-        setTimeout(() => {
-            storageProgressElement.style.width = `${usedPercentage}%`;
-        }, 300);
-    }
-
-    // Функции для статистики хранилища
-    function initStorageStats() {
-        // Начальные данные для статистики (в ГБ)
-        const storageData = {
-            total: 100,
-            used: 0,
-            fileTypes: {
-                documents: 0,
-                images: 0, 
-                archives: 0,
-                other: 0
-            }
-        };
-        
-        // Функция для обновления статистики
-        function updateStorageStats(data) {
-            // Обновляем общее использование
-            const totalSpaceEl = document.querySelector('.storage-usage .stat-value');
-            totalSpaceEl.textContent = `${data.used.toFixed(1)} из ${data.total} ГБ`;
-            
-            // Обновляем типы файлов
-            document.querySelector('.documents .type-size').textContent = `${data.fileTypes.documents.toFixed(1)} ГБ`;
-            document.querySelector('.images .type-size').textContent = `${data.fileTypes.images.toFixed(1)} ГБ`;
-            document.querySelector('.archives .type-size').textContent = `${data.fileTypes.archives.toFixed(1)} ГБ`;
-            document.querySelector('.other .type-size').textContent = `${data.fileTypes.other.toFixed(1)} ГБ`;
-            
-            // Обновляем диаграмму
-            const percentUsed = (data.used / data.total) * 100;
-            const progressBar = document.querySelector('.storage-progress');
-            progressBar.style.setProperty('--target-width', `${percentUsed}%`);
-            progressBar.style.width = `${percentUsed}%`;
-        }
-        
-        // Симуляция загрузки файлов для демонстрации
-        function simulateFileUpload() {
-            // Случайные значения для демонстрации
-            storageData.fileTypes.documents += Math.random() * 2;
-            storageData.fileTypes.images += Math.random() * 1.5;
-            storageData.fileTypes.archives += Math.random() * 0.8;
-            storageData.fileTypes.other += Math.random() * 0.5;
-            
-            // Обновляем общее использование
-            storageData.used = Object.values(storageData.fileTypes).reduce((total, size) => total + size, 0);
-            
-            // Убедимся, что не превышаем лимит
-            if (storageData.used > storageData.total) {
-                const ratio = storageData.total / storageData.used;
-                Object.keys(storageData.fileTypes).forEach(key => {
-                    storageData.fileTypes[key] *= ratio;
-                });
-                storageData.used = storageData.total;
-            }
-            
-            // Обновляем отображение
-            updateStorageStats(storageData);
-        }
-        
-        // Инициализация начальных значений
-        updateStorageStats(storageData);
-        
-        // Добавляем симуляцию загрузки по кнопке
-        const uploadBtn = document.querySelector('#upload-btn');
-        if (uploadBtn) {
-            uploadBtn.addEventListener('click', function() {
-                simulateFileUpload();
-            });
-        }
-        
-        // Симулируем загрузку при запуске для демонстрации
-        setTimeout(simulateFileUpload, 1000);
-        
-        // Возвращаем функции для возможного использования в других частях кода
-        return {
-            updateStats: updateStorageStats,
-            simulateUpload: simulateFileUpload
-        };
-    }
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        // ... existing code ...
-        
-        // Инициализируем статистику хранилища
-        const storageStats = initStorageStats();
-        
-        // Добавляем быструю симуляцию загрузки для демо
-        let demoUploads = 0;
-        const demoInterval = setInterval(() => {
-            storageStats.simulateUpload();
-            demoUploads++;
-            if (demoUploads >= 5) {
-                clearInterval(demoInterval);
-            }
-        }, 1500);
-    });
-
-    // Функционал для статистики хранилища
-    document.addEventListener('DOMContentLoaded', function() {
-        const uploadBtn = document.getElementById('upload-btn');
-        const storageProgress = document.querySelector('.storage-progress');
-        const storageValue = document.getElementById('storage-value');
-        const fileTypes = {
-            documents: document.getElementById('documents-size'),
-            images: document.getElementById('images-size'),
-            archives: document.getElementById('archives-size'),
-            other: document.getElementById('other-size')
-        };
-
-        // Начальные значения
-        let totalStorage = 100; // ГБ
-        let usedStorage = 0; // ГБ
-        let typeStorage = {
-            documents: 0,
-            images: 0,
-            archives: 0,
-            other: 0
-        };
-
-        // Обновляет интерфейс статистики хранилища
-        function updateStorageUI() {
-            const usedPercent = (usedStorage / totalStorage) * 100;
-            
-            // Обновляем прогресс-бар
-            storageProgress.style.width = `${usedPercent}%`;
-            
-            // Обновляем текст использования хранилища
-            storageValue.textContent = `Занято: ${usedStorage.toFixed(1)} из ${totalStorage} ГБ`;
-            
-            // Обновляем размеры для каждого типа файлов
-            for (const type in typeStorage) {
-                if (fileTypes[type]) {
-                    fileTypes[type].textContent = `${typeStorage[type].toFixed(1)} ГБ`;
-                }
-            }
-        }
-
-        // Обработчик нажатия на кнопку симуляции загрузки
-        if (uploadBtn) {
-            uploadBtn.addEventListener('click', function() {
-                // Симулируем загрузку случайного типа файла случайного размера
-                const fileTypes = ['documents', 'images', 'archives', 'other'];
-                const randomType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
-                const randomSize = Math.random() * 5; // От 0 до 5 ГБ
-                
-                // Добавляем размер к используемому хранилищу
-                usedStorage += randomSize;
-                typeStorage[randomType] += randomSize;
-                
-                // Ограничиваем максимальный размер хранилища
-                if (usedStorage > totalStorage) {
-                    const overflow = usedStorage - totalStorage;
-                    usedStorage = totalStorage;
-                    typeStorage[randomType] -= overflow;
-                }
-                
-                // Обновляем интерфейс
-                updateStorageUI();
-                
-                // Уведомление о загрузке
-                const fileTypeName = {
-                    'documents': 'Документы',
-                    'images': 'Изображения',
-                    'archives': 'Архивы',
-                    'other': 'Другое'
-                };
-                
-                createNotification(`Загружено: ${fileTypeName[randomType]} (${randomSize.toFixed(1)} ГБ)`);
-            });
-        }
-
-        // Функция для создания уведомления
-        function createNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // Анимация появления
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            // Удаление уведомления через 3 секунды
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        // Инициализация интерфейса
-        updateStorageUI();
-    });
 }); 

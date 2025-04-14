@@ -84,64 +84,6 @@
             </div>
         </div>
         
-        <div class="file-stats">
-            <div class="stat-item">
-                <i class="fas fa-file"></i>
-                <span id="fileCount">0 файлов</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-hdd"></i>
-                <span id="totalSize">0 МБ</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-chart-pie"></i>
-                <span id="storageUsage">0% использовано</span>
-            </div>
-        </div>
-        
-        <div class="storage-status">
-            <div class="section-header">
-                <h3>Использование хранилища</h3>
-            </div>
-            <div class="storage-chart-container">
-                <div class="storage-chart">
-                    <div class="storage-progress" id="storageProgress"></div>
-                </div>
-                <div class="storage-legend">
-                    <div class="legend-item">
-                        <span class="legend-color documents-color"></span>
-                        <span>Документы</span>
-                        <span id="documentsSize">0 МБ</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color images-color"></span>
-                        <span>Изображения</span>
-                        <span id="imagesSize">0 МБ</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color archives-color"></span>
-                        <span>Архивы</span>
-                        <span id="archivesSize">0 МБ</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color other-color"></span>
-                        <span>Другие</span>
-                        <span id="otherSize">0 МБ</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="recently-viewed">
-            <div class="section-header">
-                <h3>Недавно просмотренные</h3>
-                <button id="clearRecentBtn" class="text-btn">Очистить</button>
-            </div>
-            <div class="recent-files" id="recentFiles">
-                <!-- Недавно просмотренные файлы -->
-            </div>
-        </div>
-        
         <div class="files-container">
             <div class="section-header">
                 <h3 id="currentCategory">Все файлы</h3>
@@ -154,52 +96,6 @@
                 <p class="loading-text">Загрузка списка файлов...</p>
             </div>
         </div>
-
-        <!-- Секция статистики хранилища -->
-        <section class="storage-section">
-            <h2>Статистика хранилища</h2>
-            <div class="storage-container">
-                <div class="storage-usage">
-                    <div class="stat-item">
-                        <span class="stat-label">Занято:</span>
-                        <span class="stat-value">0 из 100 ГБ</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="storage-progress" style="width: 0%"></div>
-                    </div>
-                </div>
-                
-                <div class="file-stats">
-                    <h3>По типам файлов</h3>
-                    <div class="file-type-list">
-                        <div class="stat-item documents">
-                            <span class="type-dot"></span>
-                            <span class="type-name">Документы</span>
-                            <span class="type-size">0 ГБ</span>
-                        </div>
-                        <div class="stat-item images">
-                            <span class="type-dot"></span>
-                            <span class="type-name">Изображения</span>
-                            <span class="type-size">0 ГБ</span>
-                        </div>
-                        <div class="stat-item archives">
-                            <span class="type-dot"></span>
-                            <span class="type-name">Архивы</span>
-                            <span class="type-size">0 ГБ</span>
-                        </div>
-                        <div class="stat-item other">
-                            <span class="type-dot"></span>
-                            <span class="type-name">Другое</span>
-                            <span class="type-size">0 ГБ</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="storage-actions">
-                <button id="upload-btn" class="btn">Симулировать загрузку</button>
-            </div>
-        </section>
     </main>
 
     <div class="modal" id="fileModal">

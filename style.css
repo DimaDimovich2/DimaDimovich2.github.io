@@ -305,6 +305,15 @@ h1 {
     background: var(--hover-bg);
 }
 
+/* Начало стилей для элементов, которые мы скрываем */
+.file-stats, 
+.storage-status, 
+.recently-viewed, 
+.storage-section {
+    display: none !important;
+}
+/* Конец стилей для скрытых элементов */
+
 /* Статистика */
 .file-stats {
     display: flex;
