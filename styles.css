@@ -210,6 +210,14 @@ h2 {
     display: grid;
     gap: 1rem;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    min-height: 200px;
+}
+
+.loading-text {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem 0;
 }
 
 .file-item {
@@ -259,6 +267,30 @@ h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.download-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    background: rgba(138, 110, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.file-item:hover .download-icon {
+    opacity: 1;
+}
+
+.download-icon i {
+    font-size: 0.7rem;
+    color: var(--primary-color);
 }
 
 /* Modal */
@@ -323,11 +355,11 @@ h2 {
 
 .modal-actions {
     display: flex;
-    gap: 1rem;
+    justify-content: center;
 }
 
 .btn {
-    padding: 0.7rem 1.5rem;
+    padding: 0.8rem 2rem;
     border-radius: 8px;
     border: none;
     cursor: pointer;
@@ -341,19 +373,20 @@ h2 {
 #downloadBtn {
     background: linear-gradient(45deg, var(--primary-color), #9B81FF);
     color: white;
+    font-size: 1rem;
 }
 
 #downloadBtn:hover {
+    transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(138, 110, 255, 0.3);
 }
 
-.delete-btn {
-    background: rgba(255, 70, 70, 0.15);
-    color: #FF4646;
-}
-
-.delete-btn:hover {
-    background: rgba(255, 70, 70, 0.25);
+.file-error {
+    text-align: center;
+    grid-column: 1 / -1;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
 }
 
 /* Responsive */
@@ -364,10 +397,6 @@ h2 {
     
     h1 {
         font-size: 2rem;
-    }
-    
-    .drop-area {
-        padding: 1.5rem;
     }
     
     .file-list {

@@ -1,54 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM элементы
-    const dropArea = document.getElementById('dropArea');
-    const fileInput = document.getElementById('fileInput');
-    const uploadProgress = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
     const fileList = document.getElementById('fileList');
     const searchInput = document.getElementById('searchInput');
     const fileModal = document.getElementById('fileModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalContent = document.getElementById('modalContent');
     const downloadBtn = document.getElementById('downloadBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
     const closeModalBtn = document.querySelector('.close');
 
-    // Текущие выбранные файлы и активный файл для модального окна
-    let currentFiles = [];
+    // Активный файл для модального окна
     let activeFile = null;
-
-    // Инициализация - загрузка списка файлов
+    
+    // Загружаем список файлов при инициализации
     loadFileList();
-
-    // Обработчики событий перетаскивания
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    // Визуальные эффекты при перетаскивании
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.add('active');
-        });
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.remove('active');
-        });
-    });
-
-    // Обработка брошенных файлов
-    dropArea.addEventListener('drop', handleDrop);
-    fileInput.addEventListener('change', handleFiles);
-    dropArea.addEventListener('click', () => fileInput.click());
 
     // Обработка поиска
     searchInput.addEventListener('input', filterFiles);
@@ -64,83 +28,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Кнопки в модальном окне
+    // Кнопка скачивания в модальном окне
     downloadBtn.addEventListener('click', downloadFile);
-    deleteBtn.addEventListener('click', deleteFile);
 
-    // Функции для обработки файлов
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles({ target: { files } });
-    }
-
-    function handleFiles(e) {
-        const files = [...e.target.files];
-        if (files.length === 0) return;
-
-        currentFiles = files;
-        uploadFiles(files);
-    }
-
-    function uploadFiles(files) {
-        // Показать прогресс загрузки
-        uploadProgress.style.display = 'block';
-        
-        // Имитация загрузки (в реальном приложении здесь был бы AJAX запрос)
-        let progress = 0;
-        const totalFiles = files.length;
-        const interval = setInterval(() => {
-            progress += 5;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${progress}%`;
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    uploadProgress.style.display = 'none';
-                    saveFiles(files);
-                    loadFileList();
-                    fileInput.value = '';
-                }, 500);
-            }
-        }, 100);
-    }
-
-    // Сохранение файлов (имитация - сохраняем данные в localStorage)
-    function saveFiles(files) {
-        let savedFiles = getSavedFiles();
-        
-        files.forEach(file => {
-            const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const savedFile = {
-                id: fileId,
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                date: new Date().toISOString(),
-                path: `files/${file.name}` // В реальности здесь был бы путь на сервере
-            };
-            
-            savedFiles.push(savedFile);
-        });
-        
-        localStorage.setItem('uploadedFiles', JSON.stringify(savedFiles));
-    }
-
-    // Получение сохраненных файлов из localStorage
-    function getSavedFiles() {
-        const files = localStorage.getItem('uploadedFiles');
-        return files ? JSON.parse(files) : [];
-    }
-
-    // Загрузка списка файлов
+    // Загрузка списка файлов из директории
     function loadFileList() {
-        const files = getSavedFiles();
+        // В реальном приложении здесь был бы AJAX запрос к серверу
+        // для получения списка файлов из директории
+        
+        // Для примера создадим некоторые демонстрационные файлы
+        const demoFiles = [
+            {
+                name: 'презентация.pptx',
+                size: 2540000,
+                type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                date: '2023-10-15T10:30:00.000Z',
+                path: 'files/презентация.pptx'
+            },
+            {
+                name: 'документация.pdf',
+                size: 1250000,
+                type: 'application/pdf',
+                date: '2023-10-10T14:15:00.000Z',
+                path: 'files/документация.pdf'
+            },
+            {
+                name: 'отчет.docx',
+                size: 550000,
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                date: '2023-10-05T09:45:00.000Z',
+                path: 'files/отчет.docx'
+            },
+            {
+                name: 'данные.xlsx',
+                size: 820000,
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                date: '2023-10-01T16:20:00.000Z',
+                path: 'files/данные.xlsx'
+            },
+            {
+                name: 'фото.jpg',
+                size: 1800000,
+                type: 'image/jpeg',
+                date: '2023-09-28T11:10:00.000Z',
+                path: 'files/фото.jpg'
+            },
+            {
+                name: 'архив.zip',
+                size: 3500000,
+                type: 'application/zip',
+                date: '2023-09-25T13:40:00.000Z',
+                path: 'files/архив.zip'
+            },
+            {
+                name: 'инструкция.txt',
+                size: 15000,
+                type: 'text/plain',
+                date: '2023-09-20T10:05:00.000Z',
+                path: 'files/инструкция.txt'
+            },
+            {
+                name: 'видео.mp4',
+                size: 25000000,
+                type: 'video/mp4',
+                date: '2023-09-15T15:30:00.000Z',
+                path: 'files/видео.mp4'
+            }
+        ];
+        
+        displayFiles(demoFiles);
+    }
+
+    // Отображение файлов в списке
+    function displayFiles(files) {
         fileList.innerHTML = '';
         
         if (files.length === 0) {
-            fileList.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: var(--text-muted);">Нет загруженных файлов</p>';
+            fileList.innerHTML = '<p class="file-error">Файлы не найдены</p>';
             return;
         }
         
@@ -154,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createFileElement(file) {
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
-        fileItem.dataset.fileId = file.id;
+        fileItem.style.position = 'relative';
         
         const fileIcon = getFileIcon(file.type);
         const fileDate = new Date(file.date).toLocaleDateString();
@@ -169,6 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>${fileSize}</span>
                 <span>·</span>
                 <span>${fileDate}</span>
+            </div>
+            <div class="download-icon">
+                <i class="fas fa-download"></i>
             </div>
         `;
         
@@ -185,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fileType.includes('pdf')) return 'fas fa-file-pdf';
         if (fileType.includes('word') || fileType.includes('document')) return 'fas fa-file-word';
         if (fileType.includes('excel') || fileType.includes('sheet')) return 'fas fa-file-excel';
+        if (fileType.includes('presentation') || fileType.includes('powerpoint')) return 'fas fa-file-powerpoint';
         if (fileType.includes('video')) return 'fas fa-file-video';
         if (fileType.includes('audio')) return 'fas fa-file-audio';
         if (fileType.includes('zip') || fileType.includes('archive') || fileType.includes('compressed')) return 'fas fa-file-archive';
@@ -220,10 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>${file.type || 'Неизвестный'}</div>
                     <div style="color: var(--text-muted);">Размер:</div>
                     <div>${formatFileSize(file.size)}</div>
-                    <div style="color: var(--text-muted);">Дата загрузки:</div>
+                    <div style="color: var(--text-muted);">Дата добавления:</div>
                     <div>${new Date(file.date).toLocaleString()}</div>
-                    <div style="color: var(--text-muted);">Путь:</div>
-                    <div style="word-break: break-all;">${file.path}</div>
                 </div>
             </div>
         `;
@@ -244,53 +210,85 @@ document.addEventListener('DOMContentLoaded', () => {
     // Фильтрация файлов по поиску
     function filterFiles() {
         const searchTerm = searchInput.value.toLowerCase();
-        const files = getSavedFiles();
         
-        fileList.innerHTML = '';
+        // В реальном приложении здесь был бы запрос к серверу
+        // Для примера снова создадим демонстрационные файлы и отфильтруем их
+        const demoFiles = [
+            {
+                name: 'презентация.pptx',
+                size: 2540000,
+                type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                date: '2023-10-15T10:30:00.000Z',
+                path: 'files/презентация.pptx'
+            },
+            {
+                name: 'документация.pdf',
+                size: 1250000,
+                type: 'application/pdf',
+                date: '2023-10-10T14:15:00.000Z',
+                path: 'files/документация.pdf'
+            },
+            {
+                name: 'отчет.docx',
+                size: 550000,
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                date: '2023-10-05T09:45:00.000Z',
+                path: 'files/отчет.docx'
+            },
+            {
+                name: 'данные.xlsx',
+                size: 820000,
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                date: '2023-10-01T16:20:00.000Z',
+                path: 'files/данные.xlsx'
+            },
+            {
+                name: 'фото.jpg',
+                size: 1800000,
+                type: 'image/jpeg',
+                date: '2023-09-28T11:10:00.000Z',
+                path: 'files/фото.jpg'
+            },
+            {
+                name: 'архив.zip',
+                size: 3500000,
+                type: 'application/zip',
+                date: '2023-09-25T13:40:00.000Z',
+                path: 'files/архив.zip'
+            },
+            {
+                name: 'инструкция.txt',
+                size: 15000,
+                type: 'text/plain',
+                date: '2023-09-20T10:05:00.000Z',
+                path: 'files/инструкция.txt'
+            },
+            {
+                name: 'видео.mp4',
+                size: 25000000,
+                type: 'video/mp4',
+                date: '2023-09-15T15:30:00.000Z',
+                path: 'files/видео.mp4'
+            }
+        ];
         
-        if (files.length === 0) {
-            fileList.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: var(--text-muted);">Нет загруженных файлов</p>';
-            return;
-        }
-        
-        const filteredFiles = files.filter(file => 
+        const filteredFiles = demoFiles.filter(file => 
             file.name.toLowerCase().includes(searchTerm)
         );
         
-        if (filteredFiles.length === 0) {
-            fileList.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: var(--text-muted);">Файлы не найдены</p>';
-            return;
-        }
-        
-        filteredFiles.forEach(file => {
-            const fileItem = createFileElement(file);
-            fileList.appendChild(fileItem);
-        });
+        displayFiles(filteredFiles);
     }
 
     // Скачивание файла
     function downloadFile() {
         if (!activeFile) return;
         
-        // В реальном приложении здесь был бы код для скачивания файла
-        // Для демонстрации создадим фиктивную ссылку для скачивания
+        // Создаем ссылку для скачивания
         const link = document.createElement('a');
         link.href = activeFile.path;
         link.download = activeFile.name;
+        document.body.appendChild(link);
         link.click();
-    }
-
-    // Удаление файла
-    function deleteFile() {
-        if (!activeFile) return;
-        
-        if (confirm(`Вы действительно хотите удалить файл "${activeFile.name}"?`)) {
-            let savedFiles = getSavedFiles();
-            savedFiles = savedFiles.filter(file => file.id !== activeFile.id);
-            localStorage.setItem('uploadedFiles', JSON.stringify(savedFiles));
-            
-            fileModal.style.display = 'none';
-            loadFileList();
-        }
+        document.body.removeChild(link);
     }
 }); 

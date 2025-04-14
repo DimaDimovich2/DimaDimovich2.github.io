@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка Файлов</title>
+    <title>Скачивание Файлов</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -13,33 +13,18 @@
     <div class="container">
         <header>
             <h1>Файловое хранилище</h1>
-            <p class="subtitle">Загружайте и управляйте вашими файлами</p>
+            <p class="subtitle">Просматривайте и скачивайте файлы</p>
         </header>
 
-        <div class="upload-section">
-            <div class="drop-area" id="dropArea">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Перетащите файлы сюда или</p>
-                <label class="upload-btn" for="fileInput">Выберите файлы</label>
-                <input type="file" id="fileInput" multiple hidden>
-            </div>
-            
-            <div class="upload-progress" id="uploadProgress">
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar"></div>
-                </div>
-                <p id="progressText">0%</p>
-            </div>
-        </div>
-
         <div class="files-section">
-            <h2>Загруженные файлы</h2>
+            <h2>Доступные файлы</h2>
             <div class="file-search">
                 <input type="text" id="searchInput" placeholder="Поиск файлов...">
                 <i class="fas fa-search"></i>
             </div>
             <div class="file-list" id="fileList">
                 <!-- Файлы будут добавлены здесь через JavaScript -->
+                <p class="loading-text">Загрузка списка файлов...</p>
             </div>
         </div>
     </div>
@@ -51,7 +36,6 @@
             <div id="modalContent"></div>
             <div class="modal-actions">
                 <button id="downloadBtn" class="btn"><i class="fas fa-download"></i> Скачать</button>
-                <button id="deleteBtn" class="btn delete-btn"><i class="fas fa-trash"></i> Удалить</button>
             </div>
         </div>
     </div>
