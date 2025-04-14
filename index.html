@@ -7,33 +7,299 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-<body>
+<body class="light-theme">
     <header class="site-header">
-        <h1>Файловое хранилище</h1>
-        <p class="subtitle">Просматривайте и скачивайте файлы</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <i class="fas fa-folder-open logo-icon"></i>
+                <h1>Файловое хранилище</h1>
+            </div>
+            <div class="header-tools">
+                <button id="settingsBtn" class="icon-btn" title="Настройки">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="helpBtn" class="icon-btn" title="Помощь">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </div>
     </header>
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="category-nav">
+                <button class="category-btn active" data-category="all">
+                    <i class="fas fa-folder"></i>
+                    <span>Все файлы</span>
+                </button>
+                <button class="category-btn" data-category="documents">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Документы</span>
+                </button>
+                <button class="category-btn" data-category="images">
+                    <i class="fas fa-image"></i>
+                    <span>Изображения</span>
+                </button>
+                <button class="category-btn" data-category="archives">
+                    <i class="fas fa-file-archive"></i>
+                    <span>Архивы</span>
+                </button>
+                <button class="category-btn" data-category="other">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <span>Другие</span>
+                </button>
+            </div>
+            
+            <div class="view-controls">
+                <div class="sort-control">
+                    <select id="sortSelect" class="sort-select">
+                        <option value="name-asc">Имя (А-Я)</option>
+                        <option value="name-desc">Имя (Я-А)</option>
+                        <option value="date-new">Дата (новые)</option>
+                        <option value="date-old">Дата (старые)</option>
+                        <option value="size-large">Размер (большие)</option>
+                        <option value="size-small">Размер (маленькие)</option>
+                    </select>
+                </div>
+                <div class="view-toggle">
+                    <button id="gridViewBtn" class="view-btn active" title="Сетка">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button id="listViewBtn" class="view-btn" title="Список">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <main class="main-content">
         <div class="search-container">
             <div class="file-search">
                 <input type="text" id="searchInput" placeholder="Поиск файлов...">
                 <i class="fas fa-search"></i>
+                <button id="advancedSearchBtn" class="search-btn">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
             </div>
         </div>
         
-        <div class="file-list" id="fileList">
-            <!-- Файлы будут добавлены здесь через JavaScript -->
-            <p class="loading-text">Загрузка списка файлов...</p>
+        <div class="file-stats">
+            <div class="stat-item">
+                <i class="fas fa-file"></i>
+                <span id="fileCount">0 файлов</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-hdd"></i>
+                <span id="totalSize">0 МБ</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-chart-pie"></i>
+                <span id="storageUsage">0% использовано</span>
+            </div>
         </div>
+        
+        <div class="storage-status">
+            <div class="section-header">
+                <h3>Использование хранилища</h3>
+            </div>
+            <div class="storage-chart-container">
+                <div class="storage-chart">
+                    <div class="storage-progress" id="storageProgress"></div>
+                </div>
+                <div class="storage-legend">
+                    <div class="legend-item">
+                        <span class="legend-color documents-color"></span>
+                        <span>Документы</span>
+                        <span id="documentsSize">0 МБ</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color images-color"></span>
+                        <span>Изображения</span>
+                        <span id="imagesSize">0 МБ</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color archives-color"></span>
+                        <span>Архивы</span>
+                        <span id="archivesSize">0 МБ</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color other-color"></span>
+                        <span>Другие</span>
+                        <span id="otherSize">0 МБ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recently-viewed">
+            <div class="section-header">
+                <h3>Недавно просмотренные</h3>
+                <button id="clearRecentBtn" class="text-btn">Очистить</button>
+            </div>
+            <div class="recent-files" id="recentFiles">
+                <!-- Недавно просмотренные файлы -->
+            </div>
+        </div>
+        
+        <div class="files-container">
+            <div class="section-header">
+                <h3 id="currentCategory">Все файлы</h3>
+                <div class="files-info">
+                    <span id="categoryCount">0 файлов</span>
+                </div>
+            </div>
+            <div class="file-list grid-view" id="fileList">
+                <!-- Файлы будут добавлены здесь через JavaScript -->
+                <p class="loading-text">Загрузка списка файлов...</p>
+            </div>
+        </div>
+
+        <!-- Секция статистики хранилища -->
+        <section class="storage-section">
+            <h2>Статистика хранилища</h2>
+            <div class="storage-container">
+                <div class="storage-usage">
+                    <div class="stat-item">
+                        <span class="stat-label">Занято:</span>
+                        <span class="stat-value">0 из 100 ГБ</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="storage-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="file-stats">
+                    <h3>По типам файлов</h3>
+                    <div class="file-type-list">
+                        <div class="stat-item documents">
+                            <span class="type-dot"></span>
+                            <span class="type-name">Документы</span>
+                            <span class="type-size">0 ГБ</span>
+                        </div>
+                        <div class="stat-item images">
+                            <span class="type-dot"></span>
+                            <span class="type-name">Изображения</span>
+                            <span class="type-size">0 ГБ</span>
+                        </div>
+                        <div class="stat-item archives">
+                            <span class="type-dot"></span>
+                            <span class="type-name">Архивы</span>
+                            <span class="type-size">0 ГБ</span>
+                        </div>
+                        <div class="stat-item other">
+                            <span class="type-dot"></span>
+                            <span class="type-name">Другое</span>
+                            <span class="type-size">0 ГБ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="storage-actions">
+                <button id="upload-btn" class="btn">Симулировать загрузку</button>
+            </div>
+        </section>
     </main>
 
     <div class="modal" id="fileModal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">Просмотр файла</h2>
-            <div id="modalContent"></div>
-            <button id="downloadBtn" class="download-button"><i class="fas fa-download"></i> Скачать</button>
+            <div class="modal-header">
+                <h2 id="modalTitle">Просмотр файла</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalContent"></div>
+            <div class="modal-actions">
+                <button id="downloadBtn" class="download-button">
+                    <i class="fas fa-download"></i> Скачать
+                </button>
+                <div class="secondary-actions">
+                    <button id="shareBtn" class="icon-action-btn" title="Поделиться">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                    <button id="favoriteBtn" class="icon-action-btn" title="Добавить в избранное">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button id="copyLinkBtn" class="icon-action-btn" title="Копировать ссылку">
+                        <i class="fas fa-link"></i>
+                    </button>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>Настройки</h2>
+                <span class="close settings-close">&times;</span>
+            </div>
+            <div class="modal-body settings-content">
+                <div class="settings-section">
+                    <h3>Внешний вид</h3>
+                    <div class="setting-item">
+                        <span>Тема</span>
+                        <div class="theme-toggle">
+                            <button id="lightThemeBtn" class="theme-btn active">Светлая</button>
+                            <button id="darkThemeBtn" class="theme-btn">Тёмная</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span>Размер элементов</span>
+                        <div class="size-slider">
+                            <input type="range" id="elemSizeSlider" min="0" max="2" step="1" value="1">
+                            <div class="size-labels">
+                                <span>S</span>
+                                <span>M</span>
+                                <span>L</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Отображение файлов</h3>
+                    <div class="setting-item">
+                        <span>Показывать расширения файлов</span>
+                        <label class="switch">
+                            <input type="checkbox" id="showExtToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Анимации</span>
+                        <label class="switch">
+                            <input type="checkbox" id="animationToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Превью файлов</span>
+                        <label class="switch">
+                            <input type="checkbox" id="previewToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Скачивание</h3>
+                    <div class="setting-item">
+                        <span>Подтверждать скачивание</span>
+                        <label class="switch">
+                            <input type="checkbox" id="confirmDownloadToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-buttons">
+                    <button id="resetSettingsBtn" class="secondary-btn">Сбросить настройки</button>
+                    <button id="saveSettingsBtn" class="primary-btn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer">
+        <!-- Сюда будут добавляться уведомления -->
     </div>
 
     <script src="script.js"></script>
