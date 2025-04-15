@@ -591,6 +591,18 @@ form a:hover {
     text-decoration: underline;
 }
 
+/* Стили для сообщений об ошибках */
+.error-message {
+    color: var(--dnd-color);
+    background-color: rgba(237, 66, 69, 0.1);
+    border: 1px solid var(--dnd-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: none;
+}
+
 /* Модальное окно для голосовых и видеозвонков */
 .video-grid {
     display: grid;

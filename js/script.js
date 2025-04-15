@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const endCallBtn = document.getElementById('end-call-btn');
     const channels = document.querySelectorAll('.channel');
     const servers = document.querySelectorAll('.server');
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
 
     // Переменные состояния приложения
     let currentUser = null;
@@ -77,6 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Показать модальное окно регистрации
     registerLink.addEventListener('click', function(e) {
         e.preventDefault();
+        // Скрываем сообщения об ошибках при переключении между формами
+        loginError.style.display = 'none';
+        registerError.style.display = 'none';
         hideLoginModal();
         showRegisterModal();
     });
@@ -84,6 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Показать модальное окно входа
     loginLink.addEventListener('click', function(e) {
         e.preventDefault();
+        // Скрываем сообщения об ошибках при переключении между формами
+        loginError.style.display = 'none';
+        registerError.style.display = 'none';
         hideRegisterModal();
         showLoginModal();
     });
@@ -94,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         
+        // Скрываем сообщение об ошибке при новой попытке входа
+        loginError.style.display = 'none';
+        
         const user = demoUsers.find(u => u.username === username && u.password === password);
         
         if (user) {
@@ -101,7 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
             updateUserInterface();
             hideLoginModal();
         } else {
-            alert('Неверное имя пользователя или пароль');
+            // Показываем ошибку в форме вместо alert
+            loginError.textContent = 'Неверное имя пользователя или пароль';
+            loginError.style.display = 'block';
         }
     });
 
@@ -113,14 +126,42 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('reg-password').value;
         const confirmPassword = document.getElementById('reg-confirm-password').value;
         
+        // Скрываем сообщение об ошибке при новой попытке регистрации
+        registerError.style.display = 'none';
+        
         if (password !== confirmPassword) {
-            alert('Пароли не совпадают');
+            // Показываем ошибку в форме вместо alert
+            registerError.textContent = 'Пароли не совпадают';
+            registerError.style.display = 'block';
             return;
         }
         
-        // В реальном приложении здесь будет отправка данных для регистрации на сервер
-        // и создание нового пользователя
+        // Проверка, что пользователь с таким именем не существует
+        if (demoUsers.find(u => u.username === username)) {
+            // Показываем ошибку в форме вместо alert
+            registerError.textContent = 'Пользователь с таким именем уже существует';
+            registerError.style.display = 'block';
+            return;
+        }
         
+        // Создаем нового пользователя и добавляем его в массив
+        const newUser = {
+            id: demoUsers.length + 1,
+            username: username,
+            password: password,
+            avatar: 'images/avatar.png', // используем стандартный аватар
+            online: true
+        };
+        
+        demoUsers.push(newUser);
+        
+        // Очищаем поля формы
+        document.getElementById('reg-email').value = '';
+        document.getElementById('reg-username').value = '';
+        document.getElementById('reg-password').value = '';
+        document.getElementById('reg-confirm-password').value = '';
+        
+        // Показываем успешное сообщение и переходим к входу
         alert('Регистрация успешна! Теперь вы можете войти в систему.');
         hideRegisterModal();
         showLoginModal();
