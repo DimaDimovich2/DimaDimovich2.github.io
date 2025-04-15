@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат приложение</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <i class="fas fa-comments"></i>
+                    <span>ЧатАпп</span>
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="chat.html" class="active">Чат</a></li>
+                    <li><a href="profile.html">Профиль</a></li>
+                </ul>
+            </nav>
+            <div class="user-controls">
+                <button id="logout-button" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Выход
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="chat-container">
+            <!-- Боковая панель с списком чатов -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Чаты</h2>
+                    <button class="add-channel-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-chats" placeholder="Поиск чатов...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div id="chats-list" class="chats-list">
+                    <!-- Чаты будут загружены через JavaScript -->
+                </div>
+            </div>
+
+            <!-- Основная область чата -->
+            <div class="chat-main">
+                <div class="chat-header">
+                    <!-- Заголовок чата будет загружен через JavaScript -->
+                </div>
+                <div class="chat-body">
+                    <div class="messages-list">
+                        <!-- Сообщения будут загружены через JavaScript -->
+                    </div>
+                </div>
+                <div class="chat-footer">
+                    <form class="message-form">
+                        <textarea class="message-input" placeholder="Введите ваше сообщение..."></textarea>
+                        <button type="submit" class="send-button" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно для создания нового чата -->
+    <div id="create-chat-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Создать новый чат</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-chat-form">
+                    <div class="form-group">
+                        <label for="chat-name">Название чата</label>
+                        <input type="text" id="chat-name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Тип чата</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="chat-type" value="group" checked>
+                                <span>Групповой чат</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="chat-type" value="private">
+                                <span>Личный чат</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="user-email-group">
+                        <label for="user-email">Email пользователя</label>
+                        <input type="email" id="user-email" placeholder="Для личного чата">
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-cancel">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Область для уведомлений -->
+    <div id="notification-area" class="notification-area"></div>
+
+    <!-- Загрузка Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Функция для выхода из аккаунта
+        document.getElementById('logout-button').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'login.html';
+            });
+        });
+
+        // Показывает/скрывает поле для ввода email пользователя
+        document.querySelectorAll('input[name="chat-type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const userEmailGroup = document.getElementById('user-email-group');
+                userEmailGroup.style.display = this.value === 'private' ? 'block' : 'none';
+            });
+        });
+
+        // Инициализация функционала чата
+        import('./js/chat.js');
+    </script>
+</body>
+</html> 
