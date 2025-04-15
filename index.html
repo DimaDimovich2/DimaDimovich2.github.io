@@ -6,20 +6,20 @@
     <title>OTIScord - Альтернатива Discord</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
 </head>
 <body>
     <div class="app-container">
         <div class="sidebar">
             <div class="logo">
-                <img src="images/logo.png" alt="OTIScord Logo">
+                <img src="images/logo.svg" alt="OTIScord Logo">
             </div>
             <div class="server-list">
                 <div class="server active">
-                    <img src="images/server1.png" alt="Сервер 1">
+                    <img src="images/server1.svg" alt="Сервер 1">
                 </div>
                 <div class="server">
-                    <img src="images/server2.png" alt="Сервер 2">
+                    <img src="images/server2.svg" alt="Сервер 2">
                 </div>
                 <div class="add-server">
                     <i class="fas fa-plus"></i>
@@ -72,16 +72,17 @@
             </div>
             <div class="user-panel">
                 <div class="user-info">
-                    <img src="images/avatar.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar.svg" alt="Аватар" class="avatar">
                     <div class="user-details">
                         <span class="username">Пользователь</span>
                         <span class="status">В сети</span>
                     </div>
                 </div>
                 <div class="user-controls">
-                    <i class="fas fa-microphone"></i>
-                    <i class="fas fa-headphones"></i>
-                    <i class="fas fa-cog"></i>
+                    <i class="fas fa-microphone" title="Управление микрофоном"></i>
+                    <i class="fas fa-headphones" title="Управление звуком"></i>
+                    <i class="fas fa-cog" title="Настройки"></i>
+                    <i class="fas fa-sign-out-alt" id="logout-btn" title="Выйти из системы"></i>
                 </div>
             </div>
         </div>
@@ -106,7 +107,7 @@
             
             <div class="messages" id="messages">
                 <div class="message">
-                    <img src="images/avatar1.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar1.svg" alt="Аватар" class="avatar">
                     <div class="message-content">
                         <div class="message-header">
                             <span class="author">Admin</span>
@@ -118,7 +119,7 @@
                     </div>
                 </div>
                 <div class="message">
-                    <img src="images/avatar2.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar2.svg" alt="Аватар" class="avatar">
                     <div class="message-content">
                         <div class="message-header">
                             <span class="author">Пользователь123</span>
@@ -152,21 +153,21 @@
             </div>
             <div class="users-list">
                 <div class="user">
-                    <img src="images/avatar1.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar1.svg" alt="Аватар" class="avatar">
                     <div class="user-info">
                         <span class="username">Admin</span>
                         <span class="status">Онлайн</span>
                     </div>
                 </div>
                 <div class="user">
-                    <img src="images/avatar2.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar2.svg" alt="Аватар" class="avatar">
                     <div class="user-info">
                         <span class="username">Пользователь123</span>
                         <span class="status">Онлайн</span>
                     </div>
                 </div>
                 <div class="user">
-                    <img src="images/avatar.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar.svg" alt="Аватар" class="avatar">
                     <div class="user-info">
                         <span class="username">Пользователь</span>
                         <span class="status">Онлайн</span>
@@ -178,14 +179,14 @@
             </div>
             <div class="users-list offline-users">
                 <div class="user offline">
-                    <img src="images/avatar3.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar3.svg" alt="Аватар" class="avatar">
                     <div class="user-info">
                         <span class="username">Тестировщик</span>
                         <span class="status">Не в сети</span>
                     </div>
                 </div>
                 <div class="user offline">
-                    <img src="images/avatar4.png" alt="Аватар" class="avatar">
+                    <img src="images/avatar4.svg" alt="Аватар" class="avatar">
                     <div class="user-info">
                         <span class="username">НовыйПользователь</span>
                         <span class="status">Не в сети</span>

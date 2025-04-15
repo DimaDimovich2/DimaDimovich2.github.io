@@ -274,6 +274,14 @@ body {
     color: var(--highlight-color);
 }
 
+.user-controls i#logout-btn {
+    color: var(--dnd-color);
+}
+
+.user-controls i#logout-btn:hover {
+    color: var(--highlight-color);
+}
+
 /* Основной контент (чат) */
 .main-content {
     flex: 1;

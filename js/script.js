@@ -28,18 +28,99 @@ document.addEventListener('DOMContentLoaded', function() {
     let localStream = null;
     let peerConnection = null;
 
-    // Демонстрационные данные (в реальном приложении будут загружаться с сервера)
-    const demoUsers = [
-        { id: 1, username: 'Admin', password: 'admin123', avatar: 'images/avatar1.png', online: true },
-        { id: 2, username: 'Пользователь123', password: 'user123', avatar: 'images/avatar2.png', online: true },
-        { id: 3, username: 'Тестировщик', password: 'test123', avatar: 'images/avatar3.png', online: false },
-        { id: 4, username: 'НовыйПользователь', password: 'new123', avatar: 'images/avatar4.png', online: false }
+    // Инициализация данных из localStorage или использование демо-данных
+    let demoUsers = [
+        { id: 1, username: 'Admin', password: 'admin123', avatar: 'images/avatar1.svg', online: true },
+        { id: 2, username: 'Пользователь123', password: 'user123', avatar: 'images/avatar2.svg', online: true },
+        { id: 3, username: 'Тестировщик', password: 'test123', avatar: 'images/avatar3.svg', online: false },
+        { id: 4, username: 'НовыйПользователь', password: 'new123', avatar: 'images/avatar4.svg', online: false }
     ];
+    
+    // Инициализация хранилища сообщений по каналам
+    let channelMessages = {
+        'общий': [
+            {
+                author: 'Admin',
+                avatar: 'images/avatar1.svg',
+                text: 'Добро пожаловать в OTIScord! Это альтернатива Discord с открытым исходным кодом.',
+                timestamp: 'Сегодня в 12:00'
+            },
+            {
+                author: 'Пользователь123',
+                avatar: 'images/avatar2.svg',
+                text: 'Привет всем! Как дела?',
+                timestamp: 'Сегодня в 12:05'
+            }
+        ],
+        'помощь': [
+            {
+                author: 'OTIScord Бот',
+                avatar: 'images/avatar1.svg',
+                text: 'Это канал помощи. Здесь вы можете задать вопросы о работе OTIScord.',
+                timestamp: formatTimestamp(new Date())
+            }
+        ],
+        'случайное': [
+            {
+                author: 'OTIScord Бот',
+                avatar: 'images/avatar1.svg',
+                text: 'Это канал для случайных разговоров. Общайтесь на любые темы!',
+                timestamp: formatTimestamp(new Date())
+            }
+        ]
+    };
 
-    // Показать модальное окно входа при загрузке страницы
-    if (!currentUser) {
-        showLoginModal();
+    // Загрузка данных из localStorage при запуске
+    function loadDataFromStorage() {
+        // Загрузка пользователей
+        const storedUsers = localStorage.getItem('otiscord_users');
+        if (storedUsers) {
+            demoUsers = JSON.parse(storedUsers);
+        } else {
+            // Если данных нет, сохраняем дефолтные значения
+            localStorage.setItem('otiscord_users', JSON.stringify(demoUsers));
+        }
+
+        // Загрузка сообщений
+        const storedMessages = localStorage.getItem('otiscord_messages');
+        if (storedMessages) {
+            channelMessages = JSON.parse(storedMessages);
+        } else {
+            // Если данных нет, сохраняем дефолтные значения
+            localStorage.setItem('otiscord_messages', JSON.stringify(channelMessages));
+        }
+
+        // Загрузка текущего пользователя, если авторизован
+        const storedCurrentUser = localStorage.getItem('otiscord_current_user');
+        if (storedCurrentUser) {
+            currentUser = JSON.parse(storedCurrentUser);
+            updateUserInterface();
+        } else {
+            // Показать модальное окно входа, если пользователь не авторизован
+            showLoginModal();
+        }
     }
+
+    // Функция сохранения данных в localStorage
+    function saveDataToStorage() {
+        localStorage.setItem('otiscord_users', JSON.stringify(demoUsers));
+        localStorage.setItem('otiscord_messages', JSON.stringify(channelMessages));
+        if (currentUser) {
+            localStorage.setItem('otiscord_current_user', JSON.stringify(currentUser));
+        } else {
+            localStorage.removeItem('otiscord_current_user');
+        }
+    }
+
+    // Форматирование временной метки
+    function formatTimestamp(date) {
+        const hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `Сегодня в ${hours}:${minutes}`;
+    }
+
+    // Загружаем данные при запуске
+    loadDataFromStorage();
 
     // Обработчики событий
 
@@ -58,9 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
             
             const channelName = this.querySelector('span').textContent;
+            currentChannel = channelName;
             document.querySelector('.chat-header-left span').textContent = channelName;
             
-            // В реальном приложении здесь будет загрузка сообщений для выбранного канала
+            // Загрузка сообщений для выбранного канала
             loadChannelMessages(channelName);
         });
     });
@@ -108,9 +190,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const user = demoUsers.find(u => u.username === username && u.password === password);
         
         if (user) {
+            // Обновляем статус пользователя на "онлайн"
+            user.online = true;
             currentUser = user;
             updateUserInterface();
             hideLoginModal();
+            
+            // Сохраняем данные в localStorage
+            saveDataToStorage();
+            
+            // Загружаем текущий канал
+            loadChannelMessages(currentChannel);
         } else {
             // Показываем ошибку в форме вместо alert
             loginError.textContent = 'Неверное имя пользователя или пароль';
@@ -149,11 +239,14 @@ document.addEventListener('DOMContentLoaded', function() {
             id: demoUsers.length + 1,
             username: username,
             password: password,
-            avatar: 'images/avatar.png', // используем стандартный аватар
+            avatar: 'images/avatar.svg', // используем стандартный аватар
             online: true
         };
         
         demoUsers.push(newUser);
+        
+        // Сохраняем обновленный список пользователей
+        saveDataToStorage();
         
         // Очищаем поля формы
         document.getElementById('reg-email').value = '';
@@ -165,6 +258,27 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Регистрация успешна! Теперь вы можете войти в систему.');
         hideRegisterModal();
         showLoginModal();
+    });
+
+    // Обработчик для кнопки выхода из системы
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        if (currentUser) {
+            if (confirm('Вы действительно хотите выйти из системы?')) {
+                // Меняем статус пользователя на "оффлайн"
+                const user = demoUsers.find(u => u.id === currentUser.id);
+                if (user) {
+                    user.online = false;
+                }
+                
+                currentUser = null;
+                localStorage.removeItem('otiscord_current_user');
+                saveDataToStorage();
+                showLoginModal();
+                
+                // Обновляем список пользователей
+                updateUsersList();
+            }
+        }
     });
 
     // Обработчики для голосовых и видеозвонков
@@ -215,21 +329,43 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!currentUser) return;
         
         const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const timestamp = `Сегодня в ${hours}:${minutes}`;
+        const timestamp = formatTimestamp(now);
         
+        // Создаем объект сообщения
+        const messageObj = {
+            author: currentUser.username,
+            avatar: currentUser.avatar,
+            text: text,
+            timestamp: timestamp
+        };
+        
+        // Добавляем сообщение в соответствующий канал
+        if (!channelMessages[currentChannel]) {
+            channelMessages[currentChannel] = [];
+        }
+        
+        channelMessages[currentChannel].push(messageObj);
+        
+        // Сохраняем сообщения в localStorage
+        saveDataToStorage();
+        
+        // Отображаем сообщение
+        displayMessage(messageObj);
+    }
+
+    // Функция отображения сообщения
+    function displayMessage(messageObj) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
         messageElement.innerHTML = `
-            <img src="${currentUser.avatar}" alt="Аватар" class="avatar">
+            <img src="${messageObj.avatar}" alt="Аватар" class="avatar">
             <div class="message-content">
                 <div class="message-header">
-                    <span class="author">${currentUser.username}</span>
-                    <span class="timestamp">${timestamp}</span>
+                    <span class="author">${messageObj.author}</span>
+                    <span class="timestamp">${messageObj.timestamp}</span>
                 </div>
                 <div class="message-text">
-                    ${text}
+                    ${messageObj.text}
                 </div>
             </div>
         `;
@@ -240,39 +376,93 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обновление интерфейса пользователя после успешного входа
     function updateUserInterface() {
+        if (!currentUser) return;
+        
         // Обновляем информацию о текущем пользователе
         document.querySelector('.user-panel .avatar').src = currentUser.avatar;
         document.querySelector('.user-panel .username').textContent = currentUser.username;
         document.querySelector('.user-panel .status').textContent = 'В сети';
+        
+        // Обновляем список пользователей в сайдбаре
+        updateUsersList();
+    }
+
+    // Обновление списка пользователей
+    function updateUsersList() {
+        // Получаем элементы списков пользователей
+        const onlineUsersList = document.querySelector('.users-list');
+        const offlineUsersList = document.querySelector('.users-list.offline-users');
+        
+        // Очищаем списки
+        onlineUsersList.innerHTML = '';
+        offlineUsersList.innerHTML = '';
+        
+        // Счетчики пользователей
+        let onlineCount = 0;
+        let offlineCount = 0;
+        
+        // Наполняем списки пользователями
+        demoUsers.forEach(user => {
+            const userElement = document.createElement('div');
+            userElement.classList.add('user');
+            if (!user.online) {
+                userElement.classList.add('offline');
+            }
+            
+            userElement.innerHTML = `
+                <img src="${user.avatar}" alt="Аватар" class="avatar">
+                <div class="user-info">
+                    <span class="username">${user.username}</span>
+                    <span class="status">${user.online ? 'Онлайн' : 'Не в сети'}</span>
+                </div>
+            `;
+            
+            if (user.online) {
+                onlineUsersList.appendChild(userElement);
+                onlineCount++;
+            } else {
+                offlineUsersList.appendChild(userElement);
+                offlineCount++;
+            }
+        });
+        
+        // Обновляем заголовки с количеством пользователей
+        document.querySelector('.users-header h3').textContent = `ПОЛЬЗОВАТЕЛИ В СЕТИ — ${onlineCount}`;
+        document.querySelector('.users-header.offline-header h3').textContent = `НЕ В СЕТИ — ${offlineCount}`;
     }
 
     // Загрузка сообщений канала
     function loadChannelMessages(channelName) {
-        // В реальном приложении здесь будет загрузка сообщений с сервера
-        // Демонстрационная очистка и добавление сообщения о переключении канала
+        // Очищаем текущие сообщения
         messageArea.innerHTML = '';
         
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const timestamp = `Сегодня в ${hours}:${minutes}`;
-        
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.innerHTML = `
-            <img src="images/avatar1.png" alt="Аватар" class="avatar">
-            <div class="message-content">
-                <div class="message-header">
-                    <span class="author">OTIScord Бот</span>
-                    <span class="timestamp">${timestamp}</span>
-                </div>
-                <div class="message-text">
-                    Добро пожаловать в канал #${channelName}! Это начало истории канала.
-                </div>
-            </div>
-        `;
-        
-        messageArea.appendChild(messageElement);
+        // Проверяем, есть ли сообщения для этого канала
+        if (channelMessages[channelName] && channelMessages[channelName].length > 0) {
+            // Отображаем все сообщения канала
+            channelMessages[channelName].forEach(message => {
+                displayMessage(message);
+            });
+        } else {
+            // Если канал пустой, создаем приветственное сообщение
+            const welcomeMessage = {
+                author: 'OTIScord Бот',
+                avatar: 'images/avatar1.svg',
+                text: `Добро пожаловать в канал #${channelName}! Это начало истории канала.`,
+                timestamp: formatTimestamp(new Date())
+            };
+            
+            // Инициализируем канал, если он не существует
+            if (!channelMessages[channelName]) {
+                channelMessages[channelName] = [];
+            }
+            
+            // Добавляем приветственное сообщение
+            channelMessages[channelName].push(welcomeMessage);
+            saveDataToStorage();
+            
+            // Отображаем приветственное сообщение
+            displayMessage(welcomeMessage);
+        }
     }
 
     // Функции для модальных окон
@@ -386,14 +576,4 @@ document.addEventListener('DOMContentLoaded', function() {
         videoBtn.innerHTML = '<i class="fas fa-video"></i>';
         screenShareBtn.innerHTML = '<i class="fas fa-desktop"></i>';
     }
-
-    // Временная функция для демонстрации
-    // В реальном приложении это будет заменено на серверное взаимодействие
-    setTimeout(() => {
-        // Автоматически "входим" как демо-пользователь, если не вошли
-        if (!currentUser) {
-            currentUser = demoUsers[0];
-            updateUserInterface();
-        }
-    }, 1000);
 }); 
