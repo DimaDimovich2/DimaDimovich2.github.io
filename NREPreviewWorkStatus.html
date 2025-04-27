@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple-Style Glass Effect</title>
+    <style>
+        /* Основные стили Apple */
+        :root {
+            --apple-gradient: linear-gradient(135deg, #A8B8FF 0%, #FFB3FB 100%);
+            --glass-white: rgba(255, 255, 255, 0.25);
+            --apple-blur: saturate(180%) blur(20px);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--apple-gradient);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 
+                       'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            transition: background 0.5s ease;
+        }
+
+        /* Контейнер с эффектом стекла */
+        .apple-glass {
+            position: relative;
+            padding: 2rem 4rem;
+            background: var(--glass-white);
+            border-radius: 24px;
+            backdrop-filter: var(--apple-blur);
+            -webkit-backdrop-filter: var(--apple-blur);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 4px 12px rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Динамические блики */
+        .apple-glass::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 25%,
+                rgba(255, 255, 255, 0.08) 50%,
+                transparent 75%
+            );
+            animation: appleShine 6s infinite linear;
+        }
+
+        /* Текст в стиле iOS */
+        .apple-text {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            text-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(255, 255, 255, 0.2);
+            position: relative;
+            font-feature-settings: "ss01", "ss02";
+        }
+
+        /* Анимация градиента */
+        @keyframes appleShine {
+            0% { transform: rotate(0deg) translate(-25%, -25%); }
+            100% { transform: rotate(360deg) translate(-25%, -25%); }
+        }
+
+        /* Ховер-эффекты */
+        .apple-glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 6px 16px rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="apple-glass">
+        <div class="apple-text">Working as of April 27</div>
+    </div>
+</body>
+</html>
