@@ -2,451 +2,53 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ASMR Пазл</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App с NFC</title>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
-            --element-bg: rgba(255, 255, 255, 0.08);
-            --border-color: rgba(255, 255, 255, 0.15);
-            --accent: #e94560;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg-gradient);
-            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-            overflow: hidden;
-        }
-
-        .container {
-            background: var(--element-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 25px;
-            padding: 2rem 3rem;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-            transform: scale(0.9);
-            transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
-            .container:hover {
-                transform: scale(0.91);
-            }
-
-        .puzzle-title {
-            color: white;
-            text-align: center;
-            margin: 0 0 2rem 0;
-            font-size: 2.5em;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-        }
-
-        .puzzle-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 2rem;
-        }
-
-        .puzzle-item {
-            width: 100px;
-            height: 100px;
-            background: var(--element-bg);
-            border-radius: 18px;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 2em;
-            user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .puzzle-item::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(255, 255, 255, 0.05);
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-
-            .puzzle-item:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            }
-
-                .puzzle-item:hover::after {
-                    opacity: 1;
-                }
-
-            .puzzle-item:active {
-                transform: translateY(0);
-            }
-
-        .empty {
-            background: transparent;
-            border-color: transparent;
-            cursor: default;
-            box-shadow: none;
-        }
-
-            .empty:hover {
-                transform: none;
-                box-shadow: none;
-            }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 15px;
-            background: var(--element-bg);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1.1em;
-        }
-
-            .btn:hover {
-                background: var(--accent);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
-            }
-
-            .btn i {
-                font-size: 1.2em;
-            }
-
-        .win-effect {
-            position: fixed;
-            pointer-events: none;
-            width: 20px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: explode 1.5s ease-out;
-        }
-
-        @keyframes explode {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(20);
-                opacity: 0;
-            }
-        }
-
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: var(--accent);
-            animation: confetti-fall 3s linear;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100vh) rotate(0deg);
-            }
-
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-            }
-        }
-
-        .shake {
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
-        }
-
-        .instruction-panel {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--element-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
-            color: white;
-            width: 300px;
-            transform: translateX(-110%);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-            border: 1px solid var(--border-color);
-        }
-
-            .instruction-panel.show {
-                transform: translateX(0);
-            }
-
-        .instruction-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--element-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1001;
-            transition: all 0.3s;
-        }
-
-            .instruction-toggle:hover {
-                background: var(--accent);
-                transform: rotate(360deg);
-            }
-
-        .start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-            .start-screen h2 {
-                font-size: 2.5em;
-                margin-bottom: 2rem;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            }
-
-            .start-screen ul {
-                list-style: none;
-                padding: 0;
-                font-size: 1.2em;
-                line-height: 1.6;
-                max-width: 600px;
-                margin-bottom: 3rem;
-            }
-
-            .start-screen li {
-                margin: 15px 0;
-                padding: 10px;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 10px;
-            }
-
-        .start-btn {
-            padding: 15px 40px;
-            font-size: 1.2em;
-            background: var(--accent);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-            .start-btn:hover {
-                transform: scale(1.1);
-                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
-            }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #result { font-size: 24px; color: green; margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 18px; }
     </style>
 </head>
 <body>
-    <div class="start-screen" id="startScreen">
-        <h2>Добро пожаловать в ASMR Пазл! 🧩</h2>
-        <ul>
-            <li>🎯 Цель: Расставьте числа по порядку от 1 до 8, оставив пустую клетку в правом нижнем углу</li>
-            <li>🖱️ Кликайте по цифрам рядом с пустой клеткой для перемещения</li>
-            <li>✨ Используйте кнопку "Сброс" для перемешивания пазла</li>
-            <li>💡 Кнопка "Подсказка" подсветит возможные ходы</li>
-            <li>🎉 При победе вас ждёт праздничный эффект конфетти!</li>
-        </ul>
-        <button class="start-btn" onclick="startGame()">Начать игру!</button>
-    </div>
-
-    <div class="instruction-toggle" onclick="toggleInstructions()">
-        <i class="fas fa-question"></i>
-    </div>
-    <div class="instruction-panel" id="instructionPanel">
-        <h3>Как играть:</h3>
-        <ul>
-            <li><strong>Клик</strong> - перемещение плиток</li>
-            <li><strong>Сброс</strong> - новое перемешивание</li>
-            <li><strong>Подсказка</strong> - подсветка ходов</li>
-            <li><strong>Победа</strong> при правильной последовательности</li>
-        </ul>
-        <p>Совет: Используйте пустую клетку для маневров!</p>
-    </div>
-
-    <div class="container">
-        <h1 class="puzzle-title">✨ ASMR Пазл</h1>
-        <div class="puzzle-grid" id="grid"></div>
-        <div class="controls">
-            <button class="btn" onclick="shufflePuzzle()"><i class="fas fa-random"></i>Сброс</button>
-            <button class="btn" onclick="hint()"><i class="fas fa-lightbulb"></i>Подсказка</button>
-        </div>
-    </div>
+    <h1>Сканируйте NFC-метку</h1>
+    <button onclick="scanNFC()">Начать сканирование</button>
+    <p id="result"></p>
 
     <script>
-        let puzzle = [1, 2, 3, 4, 5, 6, 7, 8, null];
-        let winState = [1, 2, 3, 4, 5, 6, 7, 8, null];
+        // Telegram WebApp объект (опционально, для дополнительных функций)
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Инициализируем Mini App
+        tg.expand(); // Расширяем на весь экран
 
-        function createPuzzle() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
+        async function scanNFC() {
+            if ('NDEFReader' in window) {
+                try {
+                    const reader = new NDEFReader();
+                    reader.addEventListener('reading', (event) => {
+                        // Прочитанные данные из NFC-метки
+                        const message = event.message;
+                        const data = message.records[0].data; // Предполагаем текст в первом рекорде
+                        const text = new TextDecoder().decode(data);
 
-            puzzle.forEach((num, index) => {
-                const tile = document.createElement('div');
-                tile.className = `puzzle-item ${num ? '' : 'empty'}`;
-                if (num) tile.textContent = num;
-                tile.addEventListener('click', () => moveTile(index));
-                grid.appendChild(tile);
-            });
-        }
+                        // Проверка на конкретные данные
+                        if (text === 'MARINA-342904') {
+                            document.getElementById('result').textContent = 'Успешно!';
+                        } else {
+                            document.getElementById('result').textContent = 'Данные не совпадают.';
+                        }
+                    });
 
-        function moveTile(index) {
-            const emptyIndex = puzzle.indexOf(null);
-            if (isAdjacent(index, emptyIndex)) {
-                [puzzle[index], puzzle[emptyIndex]] = [puzzle[emptyIndex], puzzle[index]];
-                createPuzzle();
-                checkWin();
-                addEffect(event.pageX, event.pageY);
+                    reader.scan(); // Начинаем сканирование
+                    document.getElementById('result').textContent = 'Сканируйте метку...';
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById('result').textContent = 'Ошибка: Проверьте браузер и NFC.';
+                }
             } else {
-                document.querySelector('.container').classList.add('shake');
-                setTimeout(() => {
-                    document.querySelector('.container').classList.remove('shake');
-                }, 500);
+                document.getElementById('result').textContent = 'Web NFC API не поддерживается.';
             }
         }
-
-        function isAdjacent(a, b) {
-            const diff = Math.abs(a - b);
-            return diff === 1 || diff === 3;
-        }
-
-        function shufflePuzzle() {
-            for (let i = 0; i < 500; i++) {
-                const emptyIndex = puzzle.indexOf(null);
-                const moves = [];
-                if (emptyIndex % 3 !== 0) moves.push(emptyIndex - 1);
-                if (emptyIndex % 3 !== 2) moves.push(emptyIndex + 1);
-                if (emptyIndex >= 3) moves.push(emptyIndex - 3);
-                if (emptyIndex < 6) moves.push(emptyIndex + 3);
-                const move = moves[Math.floor(Math.random() * moves.length)];
-                [puzzle[emptyIndex], puzzle[move]] = [puzzle[move], puzzle[emptyIndex]];
-            }
-            createPuzzle();
-        }
-
-        function checkWin() {
-            if (puzzle.every((val, i) => val === winState[i])) {
-                document.querySelector('.puzzle-title').textContent = '🎉 Победа!';
-                document.querySelector('.puzzle-title').style.color = '#7bed9f';
-                createConfetti();
-            }
-        }
-
-        function addEffect(x, y) {
-            const effect = document.createElement('div');
-            effect.className = 'win-effect';
-            effect.style.left = `${x - 10}px`;
-            effect.style.top = `${y - 10}px`;
-            document.body.appendChild(effect);
-            setTimeout(() => effect.remove(), 1500);
-        }
-
-        function createConfetti() {
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = `${Math.random() * 100}%`;
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                confetti.style.animationDelay = `${Math.random() * 1}s`;
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
-            }
-        }
-
-        function hint() {
-            const emptyIndex = puzzle.indexOf(null);
-            const tiles = document.querySelectorAll('.puzzle-item:not(.empty)');
-            tiles.forEach(tile => tile.style.background = 'transparent');
-
-            const possibleMoves = [];
-            if (emptyIndex % 3 !== 0) possibleMoves.push(emptyIndex - 1);
-            if (emptyIndex % 3 !== 2) possibleMoves.push(emptyIndex + 1);
-            if (emptyIndex >= 3) possibleMoves.push(emptyIndex - 3);
-            if (emptyIndex < 6) possibleMoves.push(emptyIndex + 3);
-
-            possibleMoves.forEach(index => {
-                tiles[index].style.background = 'rgba(233, 69, 96, 0.3)';
-                setTimeout(() => {
-                    tiles[index].style.background = 'var(--element-bg)';
-                }, 1000);
-            });
-        }
-
-        function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            shufflePuzzle();
-            createPuzzle();
-        }
-
-        function toggleInstructions() {
-            const panel = document.getElementById('instructionPanel');
-            panel.classList.toggle('show');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            createPuzzle();
-        });
     </script>
 </body>
 </html>
